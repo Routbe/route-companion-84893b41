@@ -104,6 +104,61 @@ const Pill = ({
   </button>
 );
 
+/**
+ * Preview-tegel in Linktree-stijl: toont de achtergrond, de tekstkleur ("Aa")
+ * en de knopvorm/kleur van een thema of preset in één blik.
+ */
+export function DesignTile({
+  background,
+  textColor,
+  buttonColor,
+  buttonTextColor,
+  radius = 999,
+  label,
+  active,
+  onClick,
+}: {
+  background: string;
+  textColor: string;
+  buttonColor: string;
+  buttonTextColor?: string;
+  radius?: number;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className="flex flex-col gap-2 text-left"
+    >
+      <span
+        className={cn(
+          "relative flex aspect-square w-full flex-col justify-between overflow-hidden rounded-2xl border p-3 transition-all",
+          active ? "border-primary ring-2 ring-primary" : "border-border",
+        )}
+        style={{ background }}
+        aria-hidden
+      >
+        <span className="text-lg font-semibold leading-none" style={{ color: textColor }}>
+          Aa
+        </span>
+        <span
+          className="block h-6 w-full border"
+          style={{
+            background: buttonColor,
+            borderColor: buttonTextColor ?? textColor,
+            borderRadius: radius,
+          }}
+        />
+      </span>
+      <span className="truncate text-xs font-medium">{label}</span>
+    </button>
+  );
+}
+
 /** Wrapper die custom-only velden dimt zolang custom mode uitstaat. */
 function CustomGate({ custom, children }: { custom: boolean; children: React.ReactNode }) {
   return (
