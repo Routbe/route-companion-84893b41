@@ -1,5 +1,5 @@
 import { QrCode } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { SocialPlatformIcon } from "@/lib/social-icons";
 import { ProfileBasicInfoForm } from "@/components/dashboard/editor/ProfileBasicInfoForm";
@@ -51,6 +51,8 @@ import {
 import { FileUploadInput } from "@/components/FileUploadInput";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useEditorHistory } from "@/hooks/useEditorHistory";
+import { Undo2, Redo2 } from "lucide-react";
 import { useUrlStyle } from "@/hooks/useUrlStyle";
 import { useIdentitySpace } from "@/hooks/useIdentitySpace";
 import { resolveLiveProfile } from "@/lib/live-profile";
@@ -414,6 +416,33 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
    */
   const previewFree = alias || !verified;
 
+  /**
+   * Ongedaan maken / opnieuw doen (Ctrl+Z, Ctrl+Y of ⇧Ctrl+Z, en de terug/verder
+   * knoppen in de kopbalk) over alles wat je in de studio bewerkt.
+   */
+  const historySnapshot = useMemo(
+    () => ({ handle, displayName, tagline, avatarUrl, faviconUrl, theme, cardStyle, prefs, blocks }),
+    [handle, displayName, tagline, avatarUrl, faviconUrl, theme, cardStyle, prefs, blocks],
+  );
+  const applySnapshot = useCallback((s: typeof historySnapshot) => {
+    setHandle(s.handle);
+    setDisplayName(s.displayName);
+    setTagline(s.tagline);
+    setAvatarUrl(s.avatarUrl);
+    setFaviconUrl(s.faviconUrl);
+    setTheme(s.theme);
+    setCardStyle(s.cardStyle);
+    setPrefs(s.prefs);
+    setBlocks(s.blocks);
+  }, []);
+  const { undo, redo, canUndo, canRedo } = useEditorHistory({
+    snapshot: historySnapshot,
+    apply: applySnapshot,
+    enabled: !loading,
+  });
+
+
+
 
   /**
    * Debounced copy of the draft (max. 1 preview re-render per 150ms) so typing
@@ -654,14 +683,36 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
             />
           </button>
         </div>
-        <a
-          href={publicPath}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-border px-3 text-xs font-medium transition-colors hover:bg-muted"
-        >
-          <Eye className="h-3.5 w-3.5" aria-hidden /> Bekijk live profiel ↗
-        </a>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={undo}
+            disabled={!canUndo}
+            aria-label="Ongedaan maken (Ctrl+Z)"
+            title="Terug — ongedaan maken (Ctrl+Z)"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border transition-colors hover:bg-muted disabled:opacity-40"
+          >
+            <Undo2 className="h-4 w-4" aria-hidden />
+          </button>
+          <button
+            type="button"
+            onClick={redo}
+            disabled={!canRedo}
+            aria-label="Opnieuw doen (Ctrl+Y)"
+            title="Verder — opnieuw doen (Ctrl+Y)"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border transition-colors hover:bg-muted disabled:opacity-40"
+          >
+            <Redo2 className="h-4 w-4" aria-hidden />
+          </button>
+          <a
+            href={publicPath}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-border px-3 text-xs font-medium transition-colors hover:bg-muted"
+          >
+            <Eye className="h-3.5 w-3.5" aria-hidden /> Bekijk live profiel ↗
+          </a>
+        </div>
       </div>
 
       {/* RIJ 2 — hoofdnavigatie van de studio */}
