@@ -169,6 +169,8 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
   const [subdomainAlias, setSubdomainAlias] = useState<string | null>(null);
   const [rootStatus, setRootStatus] = useState<string | null>(null);
   const [aliasHandle, setAliasHandle] = useState<string | null>(null);
+  /** `profiles.username` van hetzelfde account (geverifieerde rootnaam). */
+  const [rootUsername, setRootUsername] = useState<string | null>(null);
   const { space: identitySpace, select: selectIdentitySpace } = useIdentitySpace(verified);
 
   const [legalName, setLegalName] = useState<string | null>(null);
@@ -298,7 +300,9 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
   const normalized = normalizeHandle(handle);
   const reserved = isReservedHandle(normalized);
   const handleCtx = {
-    tier: (verified ? "verified" : "free") as "verified" | "free",
+    // Het aliasprofiel blijft altijd de gratis naamruimte, ook bij een
+    // geverifieerd account: de aliasregels (cijfers) gelden daar.
+    tier: (!alias && verified ? "verified" : "free") as "verified" | "free",
     // Geverifieerde handles volgen altijd de naamstructuur — ook in privacy-modus,
     // want het blauwe vinkje hangt aan die wettelijke naam.
     legalName,
@@ -327,11 +331,13 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
    * claim actief is, anders altijd `/u/<alias>`. Nooit uit lokale state.
    */
   const live = resolveLiveProfile({
-    username: claimed,
+    username: alias ? rootUsername : claimed,
     subdomainAlias,
     rootStatus,
-    aliasHandle,
+    aliasHandle: alias ? claimed : aliasHandle,
     verified,
+    // De URL-balk hoort bij het profiel dat je nú bewerkt.
+    prefer: alias ? "alias" : "root",
   });
   const publicPath = live.path ?? styledProfilePath(claimed ?? "", urlStyle);
 
