@@ -51,6 +51,8 @@ import {
 import { FileUploadInput } from "@/components/FileUploadInput";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useEditorHistory } from "@/hooks/useEditorHistory";
+import { Undo2, Redo2 } from "lucide-react";
 import { useUrlStyle } from "@/hooks/useUrlStyle";
 import { useIdentitySpace } from "@/hooks/useIdentitySpace";
 import { resolveLiveProfile } from "@/lib/live-profile";
