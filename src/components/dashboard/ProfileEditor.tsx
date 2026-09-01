@@ -54,6 +54,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUrlStyle } from "@/hooks/useUrlStyle";
 import { useIdentitySpace } from "@/hooks/useIdentitySpace";
 import { resolveLiveProfile } from "@/lib/live-profile";
+import type { AliasProfileDTO } from "@/lib/alias-profile.functions";
+import type { StudioProfileDTO } from "@/lib/studio-profile.functions";
 import { VisitorPanel } from "@/components/dashboard/VisitorPanel";
 
 import { effectiveUrlStyle, styledProfilePath, type UrlStyle } from "@/lib/profile-url";
@@ -169,6 +171,8 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
   const [subdomainAlias, setSubdomainAlias] = useState<string | null>(null);
   const [rootStatus, setRootStatus] = useState<string | null>(null);
   const [aliasHandle, setAliasHandle] = useState<string | null>(null);
+  /** `profiles.username` van hetzelfde account (geverifieerde rootnaam). */
+  const [rootUsername, setRootUsername] = useState<string | null>(null);
   const { space: identitySpace, select: selectIdentitySpace } = useIdentitySpace(verified);
 
   const [legalName, setLegalName] = useState<string | null>(null);
@@ -195,21 +199,36 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
       try {
         console.info("[studio:profile-load:start]", { attempt: loadAttempt });
         const started = Date.now();
-        const data = await withAuthTimeout(loadProfileEditor(), "studio:getStudioProfile", 8_000);
+        const data = await withAuthTimeout(
+          loadProfileEditor() as Promise<
+            (AliasProfileDTO & Partial<StudioProfileDTO>) | (StudioProfileDTO & Partial<AliasProfileDTO>) | null
+          >,
+          "studio:getStudioProfile",
+          8_000,
+        );
         if (!active) return;
         console.info(`[studio:profile-load:done] ${Date.now() - started}ms found=${Boolean(data)}`);
         if (data) {
           setHandle(data.username ?? "");
           setClaimed(data.username ?? null);
-          setVerified(Boolean(data.verified) && data.status === "active");
           const rootData = data as Partial<{
             subdomainAlias: string | null;
             rootStatus: string | null;
             aliasHandle: string | null;
+            ownerVerified: boolean;
+            rootUsername: string | null;
           }>;
+          // Verificatie hangt aan het account, niet aan het profiel dat je
+          // bewerkt: bij het aliasprofiel komt die vlag uit `ownerVerified`.
+          setVerified(
+            alias
+              ? Boolean(rootData.ownerVerified)
+              : Boolean(data.verified) && data.status === "active",
+          );
+          setRootUsername(alias ? (rootData.rootUsername ?? null) : (data.username ?? null));
           setSubdomainAlias(rootData.subdomainAlias ?? null);
           setRootStatus(rootData.rootStatus ?? null);
-          setAliasHandle(rootData.aliasHandle ?? null);
+          setAliasHandle(alias ? (data.username ?? null) : (rootData.aliasHandle ?? null));
           setLegalName(data.verifiedLegalName || null);
           setDisplayName(data.displayName ?? "");
           setTagline(data.tagline ?? "");
@@ -289,7 +308,9 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
   const normalized = normalizeHandle(handle);
   const reserved = isReservedHandle(normalized);
   const handleCtx = {
-    tier: (verified ? "verified" : "free") as "verified" | "free",
+    // Het aliasprofiel blijft altijd de gratis naamruimte, ook bij een
+    // geverifieerd account: de aliasregels (cijfers) gelden daar.
+    tier: (!alias && verified ? "verified" : "free") as "verified" | "free",
     // Geverifieerde handles volgen altijd de naamstructuur — ook in privacy-modus,
     // want het blauwe vinkje hangt aan die wettelijke naam.
     legalName,
@@ -318,11 +339,13 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
    * claim actief is, anders altijd `/u/<alias>`. Nooit uit lokale state.
    */
   const live = resolveLiveProfile({
-    username: claimed,
+    username: alias ? rootUsername : claimed,
     subdomainAlias,
     rootStatus,
-    aliasHandle,
+    aliasHandle: alias ? claimed : aliasHandle,
     verified,
+    // De URL-balk hoort bij het profiel dat je nú bewerkt.
+    prefer: alias ? "alias" : "root",
   });
   const publicPath = live.path ?? styledProfilePath(claimed ?? "", urlStyle);
 

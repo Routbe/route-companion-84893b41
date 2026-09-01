@@ -24,6 +24,12 @@ export type LiveProfileInput = {
   /** `alias_profiles.handle` — het gratis aliasprofiel. */
   aliasHandle?: string | null;
   verified?: boolean | null;
+  /**
+   * Welk van de twee profielen wordt op dit moment bewerkt/bekeken.
+   * De Studio bewerkt telkens één profiel; de URL-balk moet dan exact dat
+   * adres tonen — niet terugvallen op het andere profiel.
+   */
+  prefer?: "root" | "alias";
 };
 
 export type LiveProfileKind = "root" | "alias" | "none";
@@ -45,10 +51,25 @@ const clean = (value: string | null | undefined): string | null => {
   return handle ? handle : null;
 };
 
-/** Is de rootnaam echt bereikbaar (geclaimd, geverifieerd én DNS actief)? */
+/**
+ * De rootnaam van een geverifieerd lid.
+ *
+ * `profiles.username` is het rootprofiel zelf: zodra het account geverifieerd
+ * is, bestaat `rout.be/<username>` en is die pagina bereikbaar. Het extra
+ * rootadres uit een subdomeinclaim (`subdomain_alias`) telt pas mee wanneer de
+ * DNS-claim `active` is — dat is een tweede adres, geen voorwaarde voor het
+ * eerste. Vroeger gold `rootStatus === "active"` voor allebei, waardoor een
+ * geverifieerd lid in de Studio zijn `/u/`-alias bleef zien.
+ */
+export function rootHandleOf(input: LiveProfileInput): string | null {
+  if (!input.verified) return null;
+  const claimed = input.rootStatus === "active" ? clean(input.subdomainAlias) : null;
+  return claimed ?? clean(input.username);
+}
+
+/** Is er een bereikbare rootpagina (`rout.be/<naam>`)? */
 export function hasActiveRoot(input: LiveProfileInput): boolean {
-  const root = clean(input.subdomainAlias) ?? clean(input.username);
-  return Boolean(root) && input.rootStatus === "active" && Boolean(input.verified);
+  return Boolean(rootHandleOf(input));
 }
 
 export function resolveLiveProfile(
@@ -58,15 +79,19 @@ export function resolveLiveProfile(
   const base = origin.replace(/\/$/, "");
   const domain = base.replace(/^https?:\/\//, "");
 
-  const root = clean(input.subdomainAlias) ?? clean(input.username);
-  const alias = clean(input.aliasHandle) ?? clean(input.username);
+  const root = rootHandleOf(input);
+  const alias = clean(input.aliasHandle) ?? (input.verified ? null : clean(input.username));
 
   const build = (kind: Exclude<LiveProfileKind, "none">, handle: string): LiveProfile => {
     const path = kind === "root" ? `/${handle}` : `/u/${handle}`;
     return { kind, handle, path, url: `${base}${path}`, label: `${domain}${path}` };
   };
 
-  if (root && hasActiveRoot(input)) return build("root", root);
+  // Bewerk je expliciet één van de twee profielen, dan wint dat adres.
+  if (input.prefer === "alias" && alias) return build("alias", alias);
+  if (input.prefer === "root" && root) return build("root", root);
+
+  if (root) return build("root", root);
   if (alias) return build("alias", alias);
   return { kind: "none", handle: null, path: null, url: null, label: null };
 }

@@ -28,11 +28,17 @@ export type AliasProfile = {
   status: string;
   verifiedLegalName: string | null;
   displayPrefs: Record<string, unknown>;
+  /** Is het gekoppelde account geverifieerd? Bepaalt de mens-badge en Pro-opties. */
+  ownerVerified: boolean;
+  /** `profiles.username` — de roothandle van hetzelfde account (indien geverifieerd). */
+  rootUsername: string | null;
+  aliasHandle: string | null;
 };
 
 function toAliasProfile(row: Row): AliasProfile {
+  const handle = (row["handle"] as string | null) ?? null;
   return {
-    username: (row["handle"] as string | null) ?? null,
+    username: handle,
     displayName: (row["display_name"] as string | null) ?? null,
     tagline: (row["tagline"] as string | null) ?? null,
     avatarUrl: (row["avatar_url"] as string | null) ?? null,
@@ -47,6 +53,9 @@ function toAliasProfile(row: Row): AliasProfile {
       row["display_prefs"] && typeof row["display_prefs"] === "object"
         ? (row["display_prefs"] as Record<string, unknown>)
         : {},
+    ownerVerified: Boolean(row["owner_verified"]),
+    rootUsername: (row["root_username"] as string | null) ?? null,
+    aliasHandle: handle,
   };
 }
 
@@ -89,11 +98,16 @@ async function ensureAliasTable(): Promise<void> {
 
 export async function readAliasProfile(userId: string): Promise<AliasProfile | null> {
   await ensureAliasTable();
+  // Ook de rootgegevens meelezen: de Studio moet weten dat dit aliasprofiel bij
+  // een geverifieerd account hoort (mens-badge, Pro-opties, tweede adres).
   const rows = (await sql`
-    select handle, display_name, tagline, avatar_url, favicon_url, theme, card_style,
-           blocks, display_prefs, enabled
-      from public.alias_profiles
-     where user_id = ${userId}
+    select a.handle, a.display_name, a.tagline, a.avatar_url, a.favicon_url, a.theme,
+           a.card_style, a.blocks, a.display_prefs, a.enabled,
+           coalesce(p.verified, false) as owner_verified,
+           p.username as root_username
+      from public.alias_profiles a
+      join public.profiles p on p.id = a.user_id
+     where a.user_id = ${userId}
      limit 1
   `) as Row[];
   const row = rows[0];
