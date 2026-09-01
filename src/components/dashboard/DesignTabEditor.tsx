@@ -209,31 +209,26 @@ export function DesignPresetSection({
           Eén klik zet kleuren, knoppen en typografie in één luxe ROUT-stijl.
         </p>
       </div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
         {ROUT_PRESETS.map((p) => {
           const pt = themeOf(p.themeId);
-          const active = theme === p.themeId;
+          const design = p.design as Partial<ProfileDisplayPrefs>;
           return (
-            <button
+            <DesignTile
               key={p.id}
-              type="button"
+              label={p.label}
+              active={theme === p.themeId}
               onClick={() => applyPreset(p.id)}
-              className={cn(
-                "flex flex-col gap-2 rounded-xl border p-2.5 text-left transition-colors",
-                active ? "border-primary ring-1 ring-primary" : "border-border",
-              )}
-            >
-              <span
-                className="block h-10 w-full rounded-lg border border-border"
-                style={{
-                  background: p.design.wallpaperGradient
-                    ? gradientCss(p.design.wallpaperGradient)
-                    : (p.design.wallpaperColor ?? pt.bg),
-                }}
-                aria-hidden
-              />
-              <span className="text-xs font-medium">{p.label}</span>
-            </button>
+              background={
+                design.wallpaperGradient
+                  ? gradientCss(design.wallpaperGradient)
+                  : (design.wallpaperColor ?? pt.bg)
+              }
+              textColor={design.titleColor ?? pt.text}
+              buttonColor={design.buttonColor ?? pt.accent ?? pt.card}
+              buttonTextColor={design.buttonTextColor ?? pt.text}
+              radius={radiusPx(design.buttonRadius)}
+            />
           );
         })}
       </div>
