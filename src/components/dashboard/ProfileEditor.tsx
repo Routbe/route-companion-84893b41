@@ -385,6 +385,14 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
   );
 
   /**
+   * De preview moet exact dezelfde namespace-regels volgen als de publieke
+   * route: `/u/<handle>` rendert altijd `free` (mens-badge + alias-URL), de
+   * schone `/<handle>` alleen voor geverifieerde leden.
+   */
+  const previewFree = alias || !verified;
+
+
+  /**
    * Debounced copy of the draft (max. 1 preview re-render per 150ms) so typing
    * stays at 60 FPS on phones instead of re-rendering the whole profile view
    * on every keystroke.
@@ -1361,7 +1369,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
 
         {/* Live preview — desktop: volledig stationair naast de editor terwijl
             de formulieren links scrollen (z-10 < vaste header z-50) */}
-        <ProfileHeaderPreview previewDraft={previewDraft} verified={verified} />
+        <ProfileHeaderPreview previewDraft={previewDraft} free={previewFree} />
       </div>
 
       {/* Low, compact mobile bar: subtle autosave status + primary live-preview action.
@@ -1422,7 +1430,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
               <div className="relative overflow-hidden rounded-[2rem] bg-background">
                 <span className="absolute left-1/2 top-2 z-10 h-1.5 w-16 -translate-x-1/2 rounded-full bg-foreground/25" />
                 <div className="scrollbar-slim aspect-[9/19.5] overflow-y-auto text-foreground">
-                  <ProfileView profile={previewDraft} free={!verified} />
+                  <ProfileView profile={previewDraft} free={previewFree} />
                 </div>
               </div>
             </div>
