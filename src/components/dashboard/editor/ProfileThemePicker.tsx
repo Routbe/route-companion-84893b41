@@ -396,6 +396,8 @@ export function ProfileThemePicker({
           </span>
         </AccordionTrigger>
         <AccordionContent className="space-y-4 pb-5">
+          <DesignWallpaperSection prefs={prefs} setPref={setPref} theme={theme} />
+          <div className="border-t border-border pt-4" />
           <VisitEffectPicker
             value={prefs.visitEffect}
             onChange={(id) => setPref("visitEffect", id)}
