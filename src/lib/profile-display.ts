@@ -564,7 +564,7 @@ export function backgroundLayers(
       };
     case "stars":
       return {
-        background: `radial-gradient(1.4px 1.4px at 20% 30%, ${theme.text}, transparent), radial-gradient(1.2px 1.2px at 70% 20%, ${theme.text}, transparent), radial-gradient(1.6px 1.6px at 40% 70%, ${theme.text}, transparent), radial-gradient(1.2px 1.2px at 85% 65%, ${theme.text}, transparent), ${theme.bg}`,
+        background: `radial-gradient(1.4px 1.4px at 20% 30%, ${theme.border}, transparent), radial-gradient(1.2px 1.2px at 70% 20%, ${theme.border}, transparent), radial-gradient(1.6px 1.6px at 40% 70%, ${theme.border}, transparent), radial-gradient(1.2px 1.2px at 85% 65%, ${theme.border}, transparent), ${theme.bg}`,
         backgroundSize: "220px 220px",
       };
     case "spotlight":
