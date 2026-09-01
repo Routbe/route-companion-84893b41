@@ -37,6 +37,10 @@ type SetPref = <K extends keyof ProfileDisplayPrefs>(
   value: ProfileDisplayPrefs[K],
 ) => void;
 
+/** Knopafronding in px, voor de previewtegels. */
+export const radiusPx = (id: ProfileDisplayPrefs["buttonRadius"] | undefined) =>
+  (BUTTON_RADII.find((r) => r.id === id) ?? BUTTON_RADII[2]!).px;
+
 function ColorField({
   label,
   value,
