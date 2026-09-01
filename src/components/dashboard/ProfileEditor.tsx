@@ -416,6 +416,33 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
    */
   const previewFree = alias || !verified;
 
+  /**
+   * Ongedaan maken / opnieuw doen (Ctrl+Z, Ctrl+Y of ⇧Ctrl+Z, en de terug/verder
+   * knoppen in de kopbalk) over alles wat je in de studio bewerkt.
+   */
+  const historySnapshot = useMemo(
+    () => ({ handle, displayName, tagline, avatarUrl, faviconUrl, theme, cardStyle, prefs, blocks }),
+    [handle, displayName, tagline, avatarUrl, faviconUrl, theme, cardStyle, prefs, blocks],
+  );
+  const applySnapshot = useCallback((s: typeof historySnapshot) => {
+    setHandle(s.handle);
+    setDisplayName(s.displayName);
+    setTagline(s.tagline);
+    setAvatarUrl(s.avatarUrl);
+    setFaviconUrl(s.faviconUrl);
+    setTheme(s.theme);
+    setCardStyle(s.cardStyle);
+    setPrefs(s.prefs);
+    setBlocks(s.blocks);
+  }, []);
+  const { undo, redo, canUndo, canRedo } = useEditorHistory({
+    snapshot: historySnapshot,
+    apply: applySnapshot,
+    enabled: !loading,
+  });
+
+
+
 
   /**
    * Debounced copy of the draft (max. 1 preview re-render per 150ms) so typing
