@@ -197,7 +197,13 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
       try {
         console.info("[studio:profile-load:start]", { attempt: loadAttempt });
         const started = Date.now();
-        const data = await withAuthTimeout(loadProfileEditor(), "studio:getStudioProfile", 8_000);
+        const data = await withAuthTimeout(
+          loadProfileEditor() as Promise<
+            (AliasProfileDTO & Partial<StudioProfileDTO>) | (StudioProfileDTO & Partial<AliasProfileDTO>) | null
+          >,
+          "studio:getStudioProfile",
+          8_000,
+        );
         if (!active) return;
         console.info(`[studio:profile-load:done] ${Date.now() - started}ms found=${Boolean(data)}`);
         if (data) {
