@@ -45,6 +45,7 @@ import {
   designButtonStyle,
   footerBlockStyle,
   fontPairingOf,
+  wallpaperImageLayerStyle,
   wallpaperOverlayStyle,
   wallpaperStyle,
 } from "@/lib/profile-display";
@@ -99,6 +100,7 @@ export function ProfileView({
     accent: prefs.patternColor ?? t.accent,
   };
   const surface = wallpaperStyle(prefs, canvas) ?? backgroundLayers(prefs.backgroundStyle, canvas);
+  const imageLayer = wallpaperImageLayerStyle(prefs);
   const overlay = wallpaperOverlayStyle(prefs);
   const banner = bannerStyleOf(prefs, t);
   const nameStyle = nameAccentStyle(prefs.nameAccent, t);
@@ -179,7 +181,7 @@ export function ProfileView({
 
   return (
     <main
-      className={`min-h-screen w-full px-4 pb-12 ${banner ? "pt-0" : "pt-12"}`}
+      className={`relative isolate min-h-screen w-full overflow-hidden px-4 pb-12 ${banner ? "pt-0" : "pt-12"}`}
       style={{
         ...surface,
         color: t.text,
@@ -187,8 +189,13 @@ export function ProfileView({
         fontSize: prefs.customDesign ? `${prefs.fontScale}%` : undefined,
       }}
     >
+      {/* Achtergrondafbeelding + verduistering blijven binnen deze pagina:
+          blur werkt op de afbeelding zelf, nooit op wat erachter staat. */}
+      {imageLayer && (
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10" style={imageLayer} />
+      )}
       {overlay && (
-        <div aria-hidden className="pointer-events-none fixed inset-0 z-0" style={overlay} />
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10" style={overlay} />
       )}
       {banner && (
         <div

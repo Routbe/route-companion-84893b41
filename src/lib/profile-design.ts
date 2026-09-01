@@ -635,23 +635,37 @@ export function wallpaperStyle(
   if (d.wallpaperType === "solid") return { background: d.wallpaperColor ?? theme.bg };
   if (d.wallpaperType === "gradient") return { background: gradientCss(d.wallpaperGradient) };
   if (d.wallpaperType === "image" && d.wallpaperImageUrl) {
-    return {
-      backgroundImage: `url("${d.wallpaperImageUrl}")`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundAttachment: "fixed",
-    };
+    // De afbeelding zelf komt in een eigen laag binnen de pagina
+    // (`wallpaperImageLayerStyle`), zodat blur nooit buiten het profiel lekt.
+    return { background: d.wallpaperColor ?? theme.bg };
   }
   return null;
 }
 
-/** Overlay (blur + verduistering) bovenop een achtergrondafbeelding. */
-export function wallpaperOverlayStyle(d: ProfileDesignPrefs): Record<string, string> | null {
+/**
+ * Achtergrondafbeelding als eigen laag *binnen* de profielpagina.
+ *
+ * De blur zit op de afbeelding zelf (`filter`), niet op `backdrop-filter`.
+ * Met `backdrop-filter` werd alles achter de laag vervaagd — in de Studio dus
+ * de hele editor rondom de preview in plaats van enkel de profielachtergrond.
+ */
+export function wallpaperImageLayerStyle(d: ProfileDesignPrefs): Record<string, string> | null {
   if (!d.customDesign || d.wallpaperType !== "image" || !d.wallpaperImageUrl) return null;
   return {
-    backdropFilter: `blur(${d.wallpaperBlur}px)`,
-    background: `rgba(0,0,0,${(d.wallpaperOverlay / 100).toFixed(2)})`,
+    backgroundImage: `url("${d.wallpaperImageUrl}")`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    filter: `blur(${d.wallpaperBlur}px)`,
+    // Iets uitvergroten zodat de blur geen doorschijnende randen geeft.
+    transform: d.wallpaperBlur > 0 ? "scale(1.08)" : "none",
   };
+}
+
+/** Verduistering bovenop de achtergrondafbeelding (zonder blur). */
+export function wallpaperOverlayStyle(d: ProfileDesignPrefs): Record<string, string> | null {
+  if (!d.customDesign || d.wallpaperType !== "image" || !d.wallpaperImageUrl) return null;
+  return { background: `rgba(0,0,0,${(d.wallpaperOverlay / 100).toFixed(2)})` };
 }
 
 /** Knopstijl uit de custom designinstellingen. `null` = val terug op het thema. */
