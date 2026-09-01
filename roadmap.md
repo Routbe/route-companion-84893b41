@@ -20,6 +20,8 @@
 - [ ] Rondleiding op mobiel testen
 
 ## Open werk (nieuw gemeld)
+- [x] Studio-preview: vaste framemaat (krimpt niet meer bij weinig tekst) + echt 390px telefoonviewport
+- [x] Studio-preview matcht de publieke route (alias `/u/<handle>` toont mens-badge "Gekoppeld aan een geverifieerd account")
 - [ ] Hub-instellingen gratis account: dubbele "Identiteit, URL & badge" naast de profielkeuze bovenaan verwijderen
 - [ ] Splits "Identiteitsverificatie & ROUT Badges"; badges verplaatsen naar "Links & components"
 - [ ] Meer Pagina Bezoek Effects toevoegen
