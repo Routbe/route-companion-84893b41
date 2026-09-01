@@ -280,12 +280,22 @@ export function DesignWallpaperSection({
       </div>
 
       {prefs.wallpaperType === "solid" && (
-        <ColorField
-          label="Achtergrondkleur"
-          value={prefs.wallpaperColor}
-          onChange={(v) => setPref("wallpaperColor", v)}
-          placeholder={t.bg}
-        />
+        <>
+          {/* Eén bron voor de vlakke achtergrondkleur: dezelfde `canvasColor`
+              als in 🎨 Thema & Kleurenschema, geen tweede kleurveld meer. */}
+          <ColorField
+            label="Achtergrondkleur"
+            value={prefs.canvasColor ?? prefs.wallpaperColor}
+            onChange={(v) => {
+              setPref("canvasColor", v);
+              setPref("wallpaperColor", v);
+            }}
+            placeholder={t.bg}
+          />
+          <p className="text-[11px] text-muted-foreground">
+            Deze kleur is dezelfde als de canvaskleur in 🎨 Thema &amp; Kleurenschema.
+          </p>
+        </>
       )}
 
       {prefs.wallpaperType === "gradient" && (
