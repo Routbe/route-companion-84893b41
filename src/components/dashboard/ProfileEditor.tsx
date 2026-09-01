@@ -201,15 +201,24 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
         if (data) {
           setHandle(data.username ?? "");
           setClaimed(data.username ?? null);
-          setVerified(Boolean(data.verified) && data.status === "active");
           const rootData = data as Partial<{
             subdomainAlias: string | null;
             rootStatus: string | null;
             aliasHandle: string | null;
+            ownerVerified: boolean;
+            rootUsername: string | null;
           }>;
+          // Verificatie hangt aan het account, niet aan het profiel dat je
+          // bewerkt: bij het aliasprofiel komt die vlag uit `ownerVerified`.
+          setVerified(
+            alias
+              ? Boolean(rootData.ownerVerified)
+              : Boolean(data.verified) && data.status === "active",
+          );
+          setRootUsername(alias ? (rootData.rootUsername ?? null) : (data.username ?? null));
           setSubdomainAlias(rootData.subdomainAlias ?? null);
           setRootStatus(rootData.rootStatus ?? null);
-          setAliasHandle(rootData.aliasHandle ?? null);
+          setAliasHandle(alias ? (data.username ?? null) : (rootData.aliasHandle ?? null));
           setLegalName(data.verifiedLegalName || null);
           setDisplayName(data.displayName ?? "");
           setTagline(data.tagline ?? "");
