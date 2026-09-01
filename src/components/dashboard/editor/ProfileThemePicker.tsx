@@ -190,33 +190,7 @@ export function ProfileThemePicker({
         </AccordionContent>
       </AccordionItem>
 
-      {/* 2 — Design Studio: presets, wallpaper, knoppen, typografie, footer */}
-      <AccordionItem
-        value="design_studio"
-        className="rounded-2xl border border-border bg-card px-4 sm:px-5"
-      >
-        <AccordionTrigger className="hover:no-underline">
-          <span className="flex flex-1 items-center justify-between gap-3 pr-2">
-            <span className="text-base font-medium">✨ Design &amp; Theme Customizer</span>
-            <span className="rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">
-              {prefs.customDesign ? "Custom" : "Preset"}
-            </span>
-          </span>
-        </AccordionTrigger>
-        <AccordionContent className="pb-5">
-          <DesignTabEditor
-            prefs={prefs}
-            setPref={setPref}
-            theme={theme}
-            setTheme={onThemeChange}
-            cardStyle={cardStyle}
-            setCardStyle={onCardStyleChange}
-            verified={verified}
-          />
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* 3 — Thema & kleuren */}
+      {/* 2 — Thema & kleuren (inclusief ROUT-presets en custom mode) */}
       <AccordionItem
         value="theme_colors"
         className="rounded-2xl border border-border bg-card px-4 sm:px-5"
