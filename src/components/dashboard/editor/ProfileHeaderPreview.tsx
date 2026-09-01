@@ -4,16 +4,24 @@ import { cn } from "@/lib/utils";
 import { ProfileView } from "@/components/profile/ProfileView";
 import type { ProfileRecord } from "@/lib/profile";
 
+/** Virtueel telefoonviewport (iPhone-breedte) en de schaal naar het frame. */
+const PHONE_VIEWPORT = 390;
+const PHONE_SCALE = 278 / PHONE_VIEWPORT;
+
 interface ProfileHeaderPreviewProps {
   previewDraft: ProfileRecord;
-  verified: boolean;
+  /**
+   * Exact dezelfde `free`-vlag als de publieke route van dit profiel gebruikt,
+   * zodat de preview 1:1 matcht met wat bezoekers zien (badge, URL, namespace).
+   */
+  free: boolean;
 }
 
 /**
  * Live preview van het profiel: telefoonmockup of desktopvenster, blijft
  * stationair naast de editor terwijl de formulieren links scrollen.
  */
-export function ProfileHeaderPreview({ previewDraft, verified }: ProfileHeaderPreviewProps) {
+export function ProfileHeaderPreview({ previewDraft, free }: ProfileHeaderPreviewProps) {
   /** Live view: realistisch telefoonframe of breed desktopvenster. */
   const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop">("mobile");
   /** Desktopscherm: werkelijke containerbreedte → schaalfactor voor het 1280px-virtuele viewport. */
@@ -71,16 +79,22 @@ export function ProfileHeaderPreview({ previewDraft, verified }: ProfileHeaderPr
 
         <div className="transition-all duration-300 ease-out">
           {previewDevice === "mobile" ? (
-            /* Smartphone: 9:18, ronde hoeken, bezel en camera-eiland; gecentreerd
-           en begrensd op 580px hoog zodat hij in de sticky kolom past */
-            <div className="mx-auto flex max-h-[580px] w-full max-w-[290px] flex-1 items-stretch overflow-hidden rounded-[36px] border-[6px] border-zinc-800 bg-black shadow-2xl transition-all duration-300">
-              <div className="relative w-full overflow-hidden rounded-[28px] bg-background">
+            /* Smartphone: vaste 278×588 behuizing (nooit meekrimpen met de
+               hoeveelheid inhoud). Binnenin een echt 390×844 telefoonviewport
+               dat met CSS-transform wordt geschaald, zodat de preview 1:1
+               overeenkomt met de publieke pagina op een telefoon. */
+            <div className="mx-auto flex h-[600px] w-[290px] shrink-0 items-stretch overflow-hidden rounded-[36px] border-[6px] border-zinc-800 bg-black shadow-2xl">
+              <div className="relative h-full w-full overflow-hidden rounded-[28px] bg-background">
                 <span className="absolute left-1/2 top-2 z-10 flex h-3 w-20 -translate-x-1/2 items-center justify-center gap-1 rounded-full bg-zinc-800">
                   <span className="h-1 w-8 rounded-full bg-background/25" />
                   <span className="h-1.5 w-1.5 rounded-full bg-background/35" />
                 </span>
-                <div className="preview-noscroll aspect-[9/18] max-h-[560px] w-full overflow-y-auto overflow-x-hidden text-foreground">
-                  <ProfileView profile={previewDraft} free={!verified} />
+                <div className="preview-noscroll h-full w-full overflow-y-auto overflow-x-hidden text-foreground">
+                  {/* `zoom` (i.p.v. transform) schaalt óók de layouthoogte, zodat
+                      het scrollen in het frame precies klopt. */}
+                  <div style={{ width: PHONE_VIEWPORT, zoom: PHONE_SCALE }}>
+                    <ProfileView profile={previewDraft} free={free} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -104,7 +118,7 @@ export function ProfileHeaderPreview({ previewDraft, verified }: ProfileHeaderPr
                     className="h-[800px] w-[1280px] origin-top-left"
                     style={{ transform: `scale(${laptopScale})` }}
                   >
-                    <ProfileView profile={previewDraft} free={!verified} layout="wide" />
+                    <ProfileView profile={previewDraft} free={free} layout="wide" />
                   </div>
                   {/* Diagonale glasglans over het scherm */}
                   <div
