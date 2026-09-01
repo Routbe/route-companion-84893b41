@@ -683,14 +683,36 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
             />
           </button>
         </div>
-        <a
-          href={publicPath}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-border px-3 text-xs font-medium transition-colors hover:bg-muted"
-        >
-          <Eye className="h-3.5 w-3.5" aria-hidden /> Bekijk live profiel ↗
-        </a>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={undo}
+            disabled={!canUndo}
+            aria-label="Ongedaan maken (Ctrl+Z)"
+            title="Terug — ongedaan maken (Ctrl+Z)"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border transition-colors hover:bg-muted disabled:opacity-40"
+          >
+            <Undo2 className="h-4 w-4" aria-hidden />
+          </button>
+          <button
+            type="button"
+            onClick={redo}
+            disabled={!canRedo}
+            aria-label="Opnieuw doen (Ctrl+Y)"
+            title="Verder — opnieuw doen (Ctrl+Y)"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border transition-colors hover:bg-muted disabled:opacity-40"
+          >
+            <Redo2 className="h-4 w-4" aria-hidden />
+          </button>
+          <a
+            href={publicPath}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-border px-3 text-xs font-medium transition-colors hover:bg-muted"
+          >
+            <Eye className="h-3.5 w-3.5" aria-hidden /> Bekijk live profiel ↗
+          </a>
+        </div>
       </div>
 
       {/* RIJ 2 — hoofdnavigatie van de studio */}
