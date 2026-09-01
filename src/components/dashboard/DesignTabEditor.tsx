@@ -37,6 +37,10 @@ type SetPref = <K extends keyof ProfileDisplayPrefs>(
   value: ProfileDisplayPrefs[K],
 ) => void;
 
+/** Knopafronding in px, voor de previewtegels. */
+export const radiusPx = (id: ProfileDisplayPrefs["buttonRadius"] | undefined) =>
+  (BUTTON_RADII.find((r) => r.id === id) ?? BUTTON_RADII[2]!).px;
+
 function ColorField({
   label,
   value,
@@ -104,6 +108,61 @@ const Pill = ({
   </button>
 );
 
+/**
+ * Preview-tegel in Linktree-stijl: toont de achtergrond, de tekstkleur ("Aa")
+ * en de knopvorm/kleur van een thema of preset in één blik.
+ */
+export function DesignTile({
+  background,
+  textColor,
+  buttonColor,
+  buttonTextColor,
+  radius = 999,
+  label,
+  active,
+  onClick,
+}: {
+  background: string;
+  textColor: string;
+  buttonColor: string;
+  buttonTextColor?: string;
+  radius?: number;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className="flex flex-col gap-2 text-left"
+    >
+      <span
+        className={cn(
+          "relative flex aspect-square w-full flex-col justify-between overflow-hidden rounded-2xl border p-3 transition-all",
+          active ? "border-primary ring-2 ring-primary" : "border-border",
+        )}
+        style={{ background }}
+        aria-hidden
+      >
+        <span className="text-lg font-semibold leading-none" style={{ color: textColor }}>
+          Aa
+        </span>
+        <span
+          className="block h-6 w-full border"
+          style={{
+            background: buttonColor,
+            borderColor: buttonTextColor ?? textColor,
+            borderRadius: radius,
+          }}
+        />
+      </span>
+      <span className="truncate text-xs font-medium">{label}</span>
+    </button>
+  );
+}
+
 /** Wrapper die custom-only velden dimt zolang custom mode uitstaat. */
 function CustomGate({ custom, children }: { custom: boolean; children: React.ReactNode }) {
   return (
@@ -154,31 +213,26 @@ export function DesignPresetSection({
           Eén klik zet kleuren, knoppen en typografie in één luxe ROUT-stijl.
         </p>
       </div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
         {ROUT_PRESETS.map((p) => {
           const pt = themeOf(p.themeId);
-          const active = theme === p.themeId;
+          const design = p.design as Partial<ProfileDisplayPrefs>;
           return (
-            <button
+            <DesignTile
               key={p.id}
-              type="button"
+              label={p.label}
+              active={theme === p.themeId}
               onClick={() => applyPreset(p.id)}
-              className={cn(
-                "flex flex-col gap-2 rounded-xl border p-2.5 text-left transition-colors",
-                active ? "border-primary ring-1 ring-primary" : "border-border",
-              )}
-            >
-              <span
-                className="block h-10 w-full rounded-lg border border-border"
-                style={{
-                  background: p.design.wallpaperGradient
-                    ? gradientCss(p.design.wallpaperGradient)
-                    : (p.design.wallpaperColor ?? pt.bg),
-                }}
-                aria-hidden
-              />
-              <span className="text-xs font-medium">{p.label}</span>
-            </button>
+              background={
+                design.wallpaperGradient
+                  ? gradientCss(design.wallpaperGradient)
+                  : (design.wallpaperColor ?? pt.bg)
+              }
+              textColor={design.titleColor ?? pt.text}
+              buttonColor={design.buttonColor ?? pt.accent ?? pt.card}
+              buttonTextColor={design.buttonTextColor ?? pt.text}
+              radius={radiusPx(design.buttonRadius)}
+            />
           );
         })}
       </div>
@@ -226,12 +280,22 @@ export function DesignWallpaperSection({
       </div>
 
       {prefs.wallpaperType === "solid" && (
-        <ColorField
-          label="Achtergrondkleur"
-          value={prefs.wallpaperColor}
-          onChange={(v) => setPref("wallpaperColor", v)}
-          placeholder={t.bg}
-        />
+        <>
+          {/* Eén bron voor de vlakke achtergrondkleur: dezelfde `canvasColor`
+              als in 🎨 Thema & Kleurenschema, geen tweede kleurveld meer. */}
+          <ColorField
+            label="Achtergrondkleur"
+            value={prefs.canvasColor ?? prefs.wallpaperColor}
+            onChange={(v) => {
+              setPref("canvasColor", v);
+              setPref("wallpaperColor", v);
+            }}
+            placeholder={t.bg}
+          />
+          <p className="text-[11px] text-muted-foreground">
+            Deze kleur is dezelfde als de canvaskleur in 🎨 Thema &amp; Kleurenschema.
+          </p>
+        </>
       )}
 
       {prefs.wallpaperType === "gradient" && (
