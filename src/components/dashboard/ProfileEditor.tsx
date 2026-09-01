@@ -1,5 +1,5 @@
 import { QrCode } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { SocialPlatformIcon } from "@/lib/social-icons";
 import { ProfileBasicInfoForm } from "@/components/dashboard/editor/ProfileBasicInfoForm";
