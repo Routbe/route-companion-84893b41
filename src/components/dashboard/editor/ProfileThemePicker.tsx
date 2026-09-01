@@ -7,7 +7,12 @@ import { AvatarFramePicker } from "@/components/studio/AvatarFramePicker";
 import { AvatarDecorationPicker } from "@/components/studio/AvatarDecorationPicker";
 import { FaviconUploader } from "@/components/studio/FaviconUploader";
 import { VisitEffectPicker } from "@/components/studio/VisitEffectPicker";
-import { DesignTabEditor } from "@/components/dashboard/DesignTabEditor";
+import {
+  DesignButtonsTypographySection,
+  DesignFooterSection,
+  DesignPresetSection,
+  DesignWallpaperSection,
+} from "@/components/dashboard/DesignTabEditor";
 import { avatarFrameLabel } from "@/lib/avatar-frames";
 import { cn } from "@/lib/utils";
 import {
