@@ -355,10 +355,33 @@ export function ProfileThemePicker({
               onCheckedChange={(v) => setPref("showWatermark", v)}
             />
           </div>
+          <div className="border-t border-border pt-4">
+            <DesignButtonsTypographySection prefs={prefs} setPref={setPref} theme={theme} />
+          </div>
         </AccordionContent>
       </AccordionItem>
 
-      {/* 4 — Achtergrond & visual FX */}
+      {/* 4 — Footer & branding */}
+      <AccordionItem
+        value="footer_branding"
+        className="rounded-2xl border border-border bg-card px-4 sm:px-5"
+      >
+        <AccordionTrigger className="hover:no-underline">
+          <span className="flex flex-1 items-center justify-between gap-3 pr-2">
+            <span className="text-base font-medium">🏷️ Footer &amp; Branding</span>
+          </span>
+        </AccordionTrigger>
+        <AccordionContent className="pb-5">
+          <DesignFooterSection
+            prefs={prefs}
+            setPref={setPref}
+            theme={theme}
+            verified={verified}
+          />
+        </AccordionContent>
+      </AccordionItem>
+
+      {/* 5 — Achtergrond & visual FX */}
       <AccordionItem
         value="background_effects"
         className="rounded-2xl border border-border bg-card px-4 sm:px-5"
