@@ -21,6 +21,11 @@ export type AliasProfileDTO = {
   status: string;
   verifiedLegalName: string | null;
   displayPrefs: Record<string, Json>;
+  /** Is het gekoppelde account geverifieerd? (Aliaspagina blijft de gratis ruimte.) */
+  ownerVerified: boolean;
+  /** Roothandle van hetzelfde account, `null` zolang er geen verificatie is. */
+  rootUsername: string | null;
+  aliasHandle: string | null;
 };
 
 export const getAliasProfile = createServerFn({ method: "GET" })
