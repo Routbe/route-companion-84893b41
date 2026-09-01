@@ -54,6 +54,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUrlStyle } from "@/hooks/useUrlStyle";
 import { useIdentitySpace } from "@/hooks/useIdentitySpace";
 import { resolveLiveProfile } from "@/lib/live-profile";
+import type { AliasProfileDTO } from "@/lib/alias-profile.functions";
+import type { StudioProfileDTO } from "@/lib/studio-profile.functions";
 import { VisitorPanel } from "@/components/dashboard/VisitorPanel";
 
 import { effectiveUrlStyle, styledProfilePath, type UrlStyle } from "@/lib/profile-url";
