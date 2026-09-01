@@ -385,6 +385,14 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
   );
 
   /**
+   * De preview moet exact dezelfde namespace-regels volgen als de publieke
+   * route: `/u/<handle>` rendert altijd `free` (mens-badge + alias-URL), de
+   * schone `/<handle>` alleen voor geverifieerde leden.
+   */
+  const previewFree = alias || !verified;
+
+
+  /**
    * Debounced copy of the draft (max. 1 preview re-render per 150ms) so typing
    * stays at 60 FPS on phones instead of re-rendering the whole profile view
    * on every keystroke.
