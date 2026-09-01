@@ -204,7 +204,14 @@ export function ProfileThemePicker({
           </span>
         </AccordionTrigger>
         <AccordionContent className="space-y-4 pb-5">
-          <p className="input-label">Themapreset</p>
+          <DesignPresetSection
+            prefs={prefs}
+            setPref={setPref}
+            theme={theme}
+            setTheme={onThemeChange}
+            setCardStyle={onCardStyleChange}
+          />
+          <p className="input-label border-t border-border pt-4">Themapreset</p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {PROFILE_THEMES.map((t) => (
               <button
